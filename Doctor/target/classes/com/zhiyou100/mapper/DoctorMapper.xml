@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou100.mapper.DoctorMapper">
+	<!-- 查询医生和门诊 -->
+	<resultMap type="doctor" id="docsec">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="time" property="time" />
+		<association property="section" javaType="section">
+			<result column="secco_name" property="seccoName" />
+		</association>
+	</resultMap>
+	<select id="findAll" parameterType="Map" resultMap="docsec">
+		SELECT
+		d.id,
+		d.NAME,
+		d.time,
+		s.secco_name
+		FROM
+		doctor d,
+		section s
+		<where>
+		  d.section_id = s.id
+		 <if test="id != null || id !='' ">
+		  and d.id like '%${id}%'
+		 </if>
+		 <if test="name != null || name !='' ">
+		  and d.NAME like '%${name}%' 
+		 </if>
+		 <if test="seccoName != null || seccoName !='' ">
+		  and s.secco_name like '%${seccoName}%'
+		 </if>
+		</where>
+	</select>
+	<!--根据id查医生 -->
+	<resultMap type="doctor" id="docseccer">
+		<result column="DNAME" property="name" />
+		<result column="ID_num" property="idNum" />
+		<result column="phone" property="phone" />
+		<result column="special_plane" property="specialPlane" />
+		<result column="sex" property="sex" />
+		<result column="age" property="age" />
+		<result column="birther" property="birther" />
+		<result column="email" property="email" />
+		<result column="education" property="education" />
+		<result column="noted" property="noted" />
+		<association property="certificatetype"
+			javaType="certificateType">
+			<result column="CNAME" property="name" />
+		</association>
+		<association property="section" javaType="section">
+			<result column="secco_name" property="seccoName" />
+		</association>
+	</resultMap>
+	<select id="lookOne" parameterType="int" resultMap="docseccer">
+		SELECT
+		d. NAME DNAME,
+		c. NAME CNAME,
+		d.ID_num,
+		d.phone,
+		d.special_plane,
+		d.sex,
+		d.age,
+		d.birther,
+		d.email,
+		s.secco_name,
+		d.education,
+		d.noted
+		FROM
+		doctor d,
+		certificate_type c,
+		section s
+		WHERE
+		d.certificate_type = c.id
+		AND
+		d.section_id = s.id
+		AND d.id = #{id};
+	</select>
+	<!-- 添加医生 -->
+	<insert id="addInfo" parameterType="doctor">
+		INSERT INTO doctor(
+		NAME,
+		certificate_type,
+		ID_num,
+		phone,
+		special_plane,
+		sex,
+		age,
+		birther,
+		email,
+		section_id,
+		education,
+		noted )
+		VALUES
+		(#{name},#{certificateType},#{idNum},#{phone},#{specialPlane},#{sex},#{age},#{birther},#{email},#{sectionId},#{education},#{noted})
+	</insert>
+	<!-- 根据id查医生 -->
+	<select id="findDoctorById" parameterType="int"
+		resultType="doctor">
+		select * from doctor where id = #{id}
+	</select>
+	<!-- 更新医生信息 -->
+	<update id="updateInfo" parameterType="doctor">
+		UPDATE doctor
+		SET NAME = #{name},
+		certificate_type = #{certificateType},
+		ID_num = #{idNum},
+		phone = #{phone},
+		special_plane = #{specialPlane},
+		sex = #{sex},
+		age = #{age},
+		birther = #{birther},
+		email = #{email},
+		section_id = #{sectionId},
+		education = #{education},
+		noted = #{noted} where id = #{id}
+	</update>
+</mapper>

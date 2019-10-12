@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou100.mapper.ChargeMapper">
+	<!-- 查询费用管理表 -->
+	<resultMap type="ChargeManager" id="cpr">
+		<result column="medical_record" property="medicalRecord" />
+		<result column="charge_money" property="chargeMoney" />
+		<result column="charge_time" property="chargeTime" />
+		<association property="registrationinfor"
+			javaType="RegistrationInfor">
+			<result column="NAME" property="name" />
+		</association>
+		<association property="payitems" javaType="PayItems">
+			<result column="charge_item_name" property="chargeItemName" />
+		</association>
+	</resultMap>
+	<select id="findCharge" parameterType="Map" resultMap="cpr">
+		SELECT
+		c.medical_record,
+		r. NAME,
+		p.charge_item_name,
+		c.charge_money,
+		c.charge_time
+		FROM
+		charge_manager c,
+		pay_items p,
+		registration_infor r
+		<where>
+			c.pay_items_id = p.id
+			AND c.medical_record = r.medical_record
+			<if test="medicalRecord != null || medicalRecord != '' ">
+				and c.medical_record like '%${medicalRecord}%'
+			</if>
+			<if test="name != null || name != '' ">
+				and r.NAME like '%${name}%'
+			</if>
+		</where>
+	</select>
+	<!-- 添加 -->
+	<insert id="insertInfo" parameterType="ChargeManager">
+		INSERT INTO charge_manager (
+		medical_record,
+		charge_money
+		)
+		VALUES
+		(
+		#{medicalRecord},#{chargeMoney})
+	</insert>
+</mapper>

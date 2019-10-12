@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou100.mapper.DispensingMapper">
+	<!--查询 -->
+	<resultMap type="Dispensing" id="dores">
+		<result column="medical_record" property="medicalRecord" />
+		<association property="registrationInfor"
+			javaType="RegistrationInfor">
+			<result column="rname" property="name" />
+		</association>
+		<association property="doctor" javaType="Doctor">
+			<result column="oname" property="name" />
+		</association>
+	</resultMap>
+	<select id="findAll" parameterType="Map" resultMap="dores">
+		select
+		d.medical_record,
+		r.name rname,
+		o.name oname
+		from
+		dispensing d,
+		registration_infor r,
+		doctor o
+		<where>
+			d.medical_record = r.medical_record
+			and r.doctor_id = o.id
+		 	<if test="medicalRecord != null || medicalRecord != '' ">
+		 	and d.medical_record like '%${medicalRecord}%'
+			</if>
+		</where>
+	</select>
+	<!-- 查询详情 -->
+    <resultMap type="Dispensing" id="ier">
+     <result column="medical_record" property="medicalRecord"/>
+     <result column="dispens_num" property="dispensNum"/>
+     <result column="alread_send_num" property="alreadSendNum"/>
+     <result column="not_send_num" property="notSendNum"/>
+     <association property="registrationInfor" javaType="RegistrationInfor">
+      <result column="NAME" property="name"/>
+     </association>
+     <association property="drug" javaType="Drug">
+      <result column="drug_name" property="drugName"/>
+     </association>
+    </resultMap>
+	<select id="lookOne" parameterType="String" resultMap="ier" >
+		SELECT
+		d.medical_record,
+		r. NAME,
+		g.drug_name,
+		d.dispens_num,
+		d.alread_send_num,
+		d.not_send_num
+		FROM
+		dispensing d,
+		registration_infor r,
+		drug g
+		WHERE
+		d.medical_record = r.medical_record
+		AND d.drug_num = g.drug_num
+		and d.medical_record = #{medicalRecord}
+	</select>
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou100.mapper.RegistrationMapper">
+	<!--挂号信息三表联查 -->
+	<resultMap type="RegistrationInfor" id="redose">
+		<result column="time" property="time" />
+		<result column="status" property="status" />
+		<result column="medical_record" property="medicalRecord" />
+		<association property="section" javaType="section">
+			<result column="seccp_num" property="seccpNum" />
+			<result column="secco_name" property="seccoName" />
+		</association>
+		<association property="doctor" javaType="doctor">
+			<result column="name" property="name" />
+		</association>
+	</resultMap>
+	<select id="findThree" parameterType="Map" resultMap="redose">
+		SELECT
+		r.medical_record,
+		s.seccp_num,
+		d.NAME,
+		r.time,
+		s.secco_name,
+		r.STATUS
+		FROM
+		registration_infor r,
+		section s,
+		doctor d
+	    <where>
+				d.id = r.doctor_id
+				and
+				r.section_id = s.id
+				<if test="medicalrecord != null || medicalrecord != '' ">
+				and s.secco_name like '%${sectionname}%'
+				</if>
+				<if test="doctorname != null || doctorname != '' ">
+				and d.NAME like '%${doctorname}%'
+				</if>
+				<if test="sectionname != null || sectionname != '' ">
+				and r.medical_record like '%${medicalrecord}%'
+				</if>				
+		</where>				
+	</select>
+	<!-- 三表联查的条数 -->
+	<select id="count" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		registration_infor r,
+		section s,
+		doctor d
+		WHERE
+		d.id = s.id =
+		r.certificate_type
+	</select>
+	<!-- 查询挂号信息 -->
+	<resultMap type="RegistrationInfor" id="Infor">
+		<result column="medical_record" property="medicalRecord" />
+		<result column="name" property="name" />
+		<result column="ID_num" property="idNum" />
+		<result column="registration_fee" property="registrationFee" />
+		<result column="social_safe_num" property="socialSafeNum" />
+		<result column="phone" property="phone" />
+		<result column="self_paying" property="selfPaying" />
+		<result column="sex" property="sex" />
+		<result column="age" property="age" />
+		<result column="career" property="career" />
+		<result column="early_appointment" property="earlyAppointment" />
+		<result column="noted" property="noted" />
+		<association property="certificatetype"
+			javaType="CertificateType">
+			<result column="ctname" property="name" />
+		</association>
+		<association property="section" javaType="Section">
+			<result column="secco_name" property="seccoName" />
+		</association>
+		<association property="doctor" javaType="Doctor">
+			<result column="doctorname" property="name" />
+		</association>
+	</resultMap>
+	<select id="lookAll" parameterType="String" resultMap="Infor">
+		SELECT
+		ri.medical_record,
+		ri.name,
+		ct.name ctname,
+		ri.ID_num,
+		ri.registration_fee,
+		ri.social_safe_num,
+		ri.phone,
+		ri.self_paying,
+		ri.sex,
+		ri.age,
+		ri.career,
+		ri.early_appointment,
+		s.secco_name,
+		d.name
+		doctorname,
+		ri.noted
+		FROM
+		registration_infor ri,
+		certificate_type ct,
+		section
+		s,
+		doctor d
+		WHERE
+		ri.medical_record = #{str}
+		AND ri.doctor_id =
+		d.id
+		AND s.id = ri.section_id
+		AND ct.id = ri.certificate_type
+	</select>
+	<!-- 添加挂号信息 -->
+	<insert id="edit" parameterType="registrationInfor">
+		INSERT INTO registration_infor (
+		medical_record,
+		NAME,
+		certificate_type,
+		ID_num,
+		registration_fee,
+		social_safe_num,
+		phone,
+		self_paying,
+		sex,
+		age,
+		career,
+		early_appointment,
+		section_id,
+		doctor_id,
+		noted
+		)
+		VALUES
+		(
+		#{medicalRecord},#{name},#{certificateType},#{idNum},#{registrationFee},#{socialSafeNum},#{phone},#{selfPaying},#{sex},#{age},#{career},#{earlyAppointment},#{sectionId},#{doctorId},#{noted})
+	</insert>
+	<!-- 删除挂号信息 -->
+	<delete id="deleteInfo" parameterType="List">
+		DELETE from
+		registration_infor
+		<where>
+		 medical_record in
+		<foreach collection="list" item="a" open="(" separator="," close=")">
+		  ${a}
+		</foreach>
+		</where> 
+	</delete>
+	<!-- 根据病例号查询 -->
+	<select id="check" parameterType="String"
+		resultType="registrationInfor">
+		select * from registration_infor where medical_record =
+		#{medicalRecord}
+	</select>
+	<!-- 更新挂号信息 -->
+	<update id="update" parameterType="registrationInfor">
+		UPDATE registration_infor
+		SET
+		medical_record=#{medicalRecord},
+		name=#{name},certificate_type=#{certificateType},ID_num=#{idNum},registration_fee=#{registrationFee},social_safe_num=#{socialSafeNum},phone=#{phone},self_paying=#{selfPaying},sex=#{sex},age=#{age},career=#{career},early_appointment=#{earlyAppointment},section_id=#{sectionId},doctor_id=#{doctorId},noted=#{noted}
+		where medical_record = #{medicalRecord}
+	</update>
+</mapper>
